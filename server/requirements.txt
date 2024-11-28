@@ -1,0 +1,8 @@
+youtube_transcript_api
+python-dotenv
+openai
+schema
+fastapi[standard]
+uvicorn[standard]
+sqlalchemy
+psycopg2-binary
