@@ -18,7 +18,12 @@ export default function PlayQuiz({ quizId }: { quizId: string }) {
 
   const [answers, setAnswers] = useState<
     { question_id: number; answer: string }[]
-  >([]);
+  >(
+    data?.data?.questions?.map((question) => ({
+      question_id: question.question_id,
+      answer: "",
+    })) ?? []
+  );
   const [activeQuestion, setActiveQuestion] = useState(0);
   const [score, setScore] = useState<null | number>(null);
 
@@ -32,23 +37,11 @@ export default function PlayQuiz({ quizId }: { quizId: string }) {
     );
 
   const handleAnswerChange = (option: string) => {
-    const updatedAnswers = [...answers];
-    const existingAnswerIndex = updatedAnswers.findIndex(
-      (ans) =>
-        ans.question_id === quiz?.questions?.[activeQuestion]?.question_id
+    const updatedAnswers = answers.map((answer, index) =>
+      index === activeQuestion
+        ? { question_id: answer.question_id, answer: option }
+        : answer
     );
-
-    if (existingAnswerIndex >= 0) {
-      updatedAnswers[existingAnswerIndex] = {
-        question_id: quiz?.questions?.[activeQuestion]?.question_id ?? 0,
-        answer: option,
-      };
-    } else {
-      updatedAnswers.push({
-        question_id: quiz?.questions?.[activeQuestion]?.question_id ?? 0,
-        answer: option,
-      });
-    }
 
     setAnswers(updatedAnswers);
   };
