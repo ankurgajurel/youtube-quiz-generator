@@ -63,9 +63,9 @@ def generate_questions_from_video(
 
 
 @questions_router.get("/list")
-def get_questions():
+def get_questions(video_id: int):
     session = SessionLocal()
-    questions = session.query(Questions).all()
+    questions = session.query(Questions).filter(Questions.video_id == video_id).all()
     session.close()
 
     return questions
