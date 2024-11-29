@@ -1,7 +1,11 @@
 import PlayQuiz from "@/components/quiz/play-quiz";
 
-export default async function HomePage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default async function HomePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
 
   return (
     <div>

@@ -20,7 +20,7 @@ export default function PlayQuiz({ quizId }: { quizId: string }) {
     { question_id: number; answer: string }[]
   >([]);
   const [activeQuestion, setActiveQuestion] = useState(0);
-  const [score, setScore] = useState<null | number>(5);
+  const [score, setScore] = useState<null | number>(null);
 
   const quiz = data?.data;
 
@@ -78,7 +78,7 @@ export default function PlayQuiz({ quizId }: { quizId: string }) {
   };
 
   return (
-    <main className="max-w-5xl mx-auto py-10 flex flex-col space-y-10">
+    <main className="max-w-5xl mx-auto py-10 flex flex-col space-y-10 px-10">
       <div className="grid gap-3">
         <h1 className="text-3xl font-bold">{quiz?.name}</h1>
         <p>{quiz?.description}</p>
@@ -90,6 +90,7 @@ export default function PlayQuiz({ quizId }: { quizId: string }) {
           reloadQuiz={() => {
             setActiveQuestion(0);
             setScore(null);
+            setAnswers([]);
           }}
         />
       ) : (
@@ -116,7 +117,7 @@ function ScoreBoard({
   reloadQuiz: () => void;
 }) {
   return (
-    <div className="h-[550px] max-w-xl w-full mx-auto border border-black flex items-center justify-center flex-col gap-3 p-10 rounded-3xl">
+    <div className="h-[450px] max-w-xl w-full mx-auto border border-black flex items-center justify-center flex-col gap-3 p-10 rounded-3xl">
       <h1 className="text-3xl tracking-tight font-bold">Score</h1>
 
       <p
@@ -173,7 +174,7 @@ function QuizForm({
       }
       className="flex-1 my-auto max-w-xl mx-auto grid gap-5"
     >
-      <div className="grid gap-3 border w-[36rem] border-black rounded-xl mx-auto p-5 h-[550px] place-items-stretch">
+      <div className="grid gap-3 border w-[36rem] border-black rounded-xl mx-auto p-5 h-[450px] place-items-stretch">
         <div className="flex justify-end">
           <span className="font-bold">
             {activeQuestion + 1} / {quiz?.questions?.length}
