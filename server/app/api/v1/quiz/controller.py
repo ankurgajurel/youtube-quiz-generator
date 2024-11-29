@@ -42,6 +42,8 @@ def create_quiz(
 def get_quizzes() -> dict:
     db = SessionLocal()
     quizzes = db.query(Quiz).all()
+    
+    print(quizzes)
 
     return JSONResponse(
         status_code=200,
@@ -133,4 +135,39 @@ def validate_answers(answers: list[dict]) -> dict:
     return JSONResponse(
         status_code=200,
         content=jsonable_encoder({"score": score, "wrong_answers": wrong_answers}),
+    )
+
+
+@quiz_router.patch("/{quiz_id}")
+def update_quiz(
+    quiz_id: int,
+    quiz: dict = {
+        "name": str,
+        "description": str,
+        "video_id": str,
+        "question_ids": list[int],
+    },
+) -> dict:
+    db = SessionLocal()
+    quiz = db.query(Quiz).filter(Quiz.id == quiz_id).first()
+    quiz.name = quiz["name"]
+    quiz.description = quiz["description"]
+    quiz.video_id = quiz["video_id"]
+    quiz.question_ids = quiz["question_ids"]
+
+    db.commit()
+
+    return JSONResponse(
+        status_code=200,
+        content=jsonable_encoder(
+            {
+                "quiz": {
+                    "id": quiz.id,
+                    "name": quiz.name,
+                    "description": quiz.description,
+                    "video_id": quiz.video_id,
+                },
+                "message": "Quiz updated successfully",
+            }
+        ),
     )

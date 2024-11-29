@@ -6,6 +6,7 @@ from .services import get_video_transcript, generate_questions
 from .model import Questions, Options, Answers, Videos
 from app.database import SessionLocal
 import json
+from urllib.parse import unquote
 
 questions_router = APIRouter(prefix="/questions")
 
@@ -14,13 +15,19 @@ questions_router = APIRouter(prefix="/questions")
 def generate_questions_from_video(
     video_url: str, questions: int = 10, options: int = 4
 ) -> dict:
-    transcript = get_video_transcript(video_url)
+    decored_video_url = unquote(video_url)
+    transcript = get_video_transcript(decored_video_url)
+
+    print(transcript)
 
     generated_questions = json.loads(
         generate_questions(transcript, questions, options)
         .replace("```json", "")
         .replace("```", ""),
     )
+
+    print(generated_questions)
+    return_video_id = 0
 
     session = SessionLocal()
     Questions.__table__.create(bind=session.get_bind(), checkfirst=True)
@@ -36,6 +43,13 @@ def generate_questions_from_video(
     )
     session.add(video_db)
     session.commit()
+    session.commit()
+    
+    return_video_id = video_db.id
+
+    print(return_video_id)
+
+    return_questions = []
 
     for question in generated_questions:
         question_text = question["question"]
@@ -45,6 +59,15 @@ def generate_questions_from_video(
         question_db = Questions(question_text=question_text, video_id=video_db.id)
         session.add(question_db)
         session.commit()
+
+        return_questions.append(
+            {
+                "question": question_text,
+                "question_id": question_db.id,
+                "options": options,
+                "correct_answer": correct_answer,
+            }
+        )
 
         for option in options:
             option_db = Options(option_text=option, question_id=question_db.id)
@@ -58,7 +81,13 @@ def generate_questions_from_video(
 
     return JSONResponse(
         status_code=201,
-        content=jsonable_encoder(generated_questions),
+        content=jsonable_encoder(
+            {
+                "questions": return_questions,
+                "message": "Questions generated successfully",
+                "video_id": return_video_id,
+            }
+        ),
     )
 
 
