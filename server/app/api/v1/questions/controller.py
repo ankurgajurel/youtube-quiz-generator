@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 
-from .services import get_video_transcript, generate_questions
+from .services import get_video_transcript, generate_questions, extract_vtt_transcript
 from .model import Questions, Options, Answers, Videos
 from app.database import SessionLocal
 import json
@@ -13,10 +13,37 @@ questions_router = APIRouter(prefix="/questions")
 
 @questions_router.post("/generate")
 def generate_questions_from_video(
-    video_url: str, questions: int = 10, options: int = 4
+    video_url: str = "",
+    questions: int = 10,
+    options: int = 4,
+    is_vtt: bool = False,
+    vtt_file_url: str = "",
 ) -> dict:
-    decored_video_url = unquote(video_url)
-    transcript = get_video_transcript(decored_video_url)
+
+    if is_vtt:
+        if not vtt_file_url:
+            return JSONResponse(
+                status_code=400,
+                content=jsonable_encoder(
+                    {
+                        "message": "Please provide the URL for the VTT file",
+                    }
+                ),
+            )
+        vtt_file = open(vtt_file_url, "r")
+        vtt = vtt_file.read()
+        transcript = extract_vtt_transcript(vtt)
+
+    else:
+        if not video_url:
+            return JSONResponse(
+                status_code=400,
+                content=jsonable_encoder(
+                    {"message": "Please provide the YouTube Video URL."}
+                ),
+            )
+        decored_video_url = unquote(video_url)
+        transcript = get_video_transcript(decored_video_url)
 
     print(transcript)
 
@@ -44,7 +71,7 @@ def generate_questions_from_video(
     session.add(video_db)
     session.commit()
     session.commit()
-    
+
     return_video_id = video_db.id
 
     print(return_video_id)

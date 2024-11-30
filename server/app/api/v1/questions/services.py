@@ -51,3 +51,13 @@ def get_video_transcript(video_url: str) -> str:
         return text
     except Exception as e:
         return ""
+
+
+def extract_vtt_transcript(vtt: str) -> str:
+    text = ""
+    for line in vtt.split("\n"):
+        if "-->" not in line:
+            text += line + " "
+
+    text.replace("\n", "")
+    return text

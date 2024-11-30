@@ -5,7 +5,16 @@ export type QuizAnswer = {
   answer: string;
 };
 
-export default async function generateQuestions(videoUrl: string) {
+export default async function generateQuestions({
+  videoUrl,
+  noOfQns,
+  noOfOptions,
+}: {
+  videoUrl?: string;
+  vttFileUrl?: string;
+  noOfQns?: number;
+  noOfOptions?: number;
+}) {
   try {
     const response = await axiosInstance.post(
       "/questions/generate",
@@ -13,8 +22,8 @@ export default async function generateQuestions(videoUrl: string) {
       {
         params: {
           video_url: videoUrl,
-          questions: 10,
-          options: 4,
+          questions: noOfQns || 10,
+          options: noOfOptions || 4,
         },
       }
     );

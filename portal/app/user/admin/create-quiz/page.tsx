@@ -6,9 +6,27 @@ import clsx from "clsx";
 import { Loader2Icon, MoveRight } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Switch } from "@/components/ui/switch";
 
 export default function CreateQuiz() {
   const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState<{
+    video_url?: string;
+    questions?: number;
+    options?: number;
+    is_vtt: boolean;
+    vtt_file_url?: string;
+    quiz_name: string;
+    quiz_description: string;
+  }>({
+    video_url: "",
+    questions: 10,
+    options: 4,
+    is_vtt: false,
+    vtt_file_url: "",
+    quiz_name: "",
+    quiz_description: "",
+  });
 
   const router = useRouter();
 
@@ -16,12 +34,18 @@ export default function CreateQuiz() {
     e.preventDefault();
     setIsLoading(true);
 
+    console.log(formData);
+    return;
+
     const quizName = e.currentTarget["quiz-name"].value;
     const quizDescription = e.currentTarget["quiz-description"].value;
     try {
-      const genQnsRes = await generateQuestions(
-        (e.currentTarget["youtube-url"] as HTMLInputElement).value
-      );
+      const genQnsRes = await generateQuestions({
+        videoUrl: (e.currentTarget["youtube-url"] as HTMLInputElement).value,
+        noOfQns: parseInt(
+          (e.currentTarget["no-of-qns"] as HTMLInputElement).value
+        ),
+      });
 
       const question_ids: string[] = genQnsRes.questions.map(
         (q: { question_id: number }) => q.question_id.toString()
@@ -61,24 +85,74 @@ export default function CreateQuiz() {
       >
         <div className="grid grid-cols-2 gap-x-10 gap-y-5">
           <Input
-            cols="col-span-2"
-            label="Youtube URL"
-            id="youtube-url"
-            className="w-3/4"
-            type="text"
-            placeholder="https://www.youtube.com/watch?v=..."
-          />
-          <Input
             label="Quiz Name"
             id="quiz-name"
             type="text"
+            onChange={(e) => {
+              setFormData({ ...formData, quiz_name: e.target.value });
+            }}
             placeholder="Enter the quiz name"
           />
           <Input
             label="Quiz Description"
             id="quiz-description"
             type="text"
+            onChange={(e) => {
+              setFormData({ ...formData, quiz_description: e.target.value });
+            }}
             placeholder="Enter the quiz description"
+          />
+          <Input
+            label="No. of questions"
+            id="no-of-qns"
+            type="number"
+            defaultValue={10}
+            maxLength={20}
+            onChange={(e) => {
+              setFormData({ ...formData, questions: parseInt(e.target.value) });
+            }}
+            placeholder="Enter the number of questions"
+          />
+          <Input
+            label="No. of options"
+            id="no-of-options"
+            type="text"
+            maxLength={5}
+            defaultValue={4}
+            onChange={(e) => {
+              setFormData({ ...formData, options: parseInt(e.target.value) });
+            }}
+            placeholder="Enter the number of options per question"
+          />
+          <Switch
+            checked={formData.is_vtt}
+            onCheckedChange={(e) => {
+              setFormData({ ...formData, is_vtt: e });
+            }}
+          />
+          <Input
+            cols="col-span-2"
+            label={formData.is_vtt ? "VTT File URL" : "Youtube URL"}
+            id={formData.is_vtt ? "vtt-url" : "youtube-url"}
+            className="w-3/4"
+            type="text"
+            value={formData.is_vtt ? formData.vtt_file_url : formData.video_url}
+            onChange={(e) => {
+              if (formData.is_vtt) {
+                setFormData({
+                  ...formData,
+                  vtt_file_url: e.target.value,
+                });
+              } else {
+                setFormData({
+                  ...formData,
+                  video_url: e.target.value,
+                });
+              }
+            }}
+            placeholder={
+              formData.is_vtt ? "https://cdn.sample.com/sample.vtt" : "https://www.youtube.com/watch?v=..."
+            }
           />
         </div>
         <button
