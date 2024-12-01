@@ -18,6 +18,7 @@ export default function CreateQuiz() {
     vtt_file_url?: string;
     quiz_name: string;
     quiz_description: string;
+    quiz_timer: number;
   }>({
     video_url: "",
     questions: 10,
@@ -26,6 +27,7 @@ export default function CreateQuiz() {
     vtt_file_url: "",
     quiz_name: "",
     quiz_description: "",
+    quiz_timer: 0,
   });
 
   const router = useRouter();
@@ -34,11 +36,6 @@ export default function CreateQuiz() {
     e.preventDefault();
     setIsLoading(true);
 
-    console.log(formData);
-    return;
-
-    const quizName = e.currentTarget["quiz-name"].value;
-    const quizDescription = e.currentTarget["quiz-description"].value;
     try {
       const genQnsRes = await generateQuestions({
         videoUrl: (e.currentTarget["youtube-url"] as HTMLInputElement).value,
@@ -54,10 +51,11 @@ export default function CreateQuiz() {
       console.log(e);
 
       const createQuizRes = await createQuiz(
-        quizName,
+        formData.quiz_name,
         genQnsRes.video_id.toString(),
-        quizDescription,
-        question_ids
+        formData.quiz_description,
+        question_ids,
+        formData.quiz_timer
       );
 
       console.log(createQuizRes);
@@ -116,20 +114,40 @@ export default function CreateQuiz() {
           <Input
             label="No. of options"
             id="no-of-options"
-            type="text"
+            type="number"
             maxLength={5}
-            defaultValue={4}
+            value={4}
             onChange={(e) => {
               setFormData({ ...formData, options: parseInt(e.target.value) });
             }}
             placeholder="Enter the number of options per question"
           />
-          <Switch
-            checked={formData.is_vtt}
-            onCheckedChange={(e) => {
-              setFormData({ ...formData, is_vtt: e });
+          <Input
+            label="Quiz Timer"
+            id="quiz-timer"
+            type="text"
+            value={4}
+            onChange={(e) => {
+              setFormData({
+                ...formData,
+                quiz_timer: parseInt(e.target.value),
+              });
             }}
+            placeholder="Enter the timero for quiz in seconds. (Optional)"
           />
+          <div className="flex flex-col justify-between">
+            <label className="block text-lg font-medium text-gray-700">
+              Are you using a VTT file instead of a YouTube video?
+            </label>
+
+            <Switch
+              className="my-auto"
+              checked={formData.is_vtt}
+              onCheckedChange={(e) => {
+                setFormData({ ...formData, is_vtt: e });
+              }}
+            />
+          </div>
           <Input
             cols="col-span-2"
             label={formData.is_vtt ? "VTT File URL" : "Youtube URL"}
@@ -151,7 +169,9 @@ export default function CreateQuiz() {
               }
             }}
             placeholder={
-              formData.is_vtt ? "https://cdn.sample.com/sample.vtt" : "https://www.youtube.com/watch?v=..."
+              formData.is_vtt
+                ? "https://cdn.sample.com/sample.vtt"
+                : "https://www.youtube.com/watch?v=..."
             }
           />
         </div>

@@ -8,7 +8,7 @@ export default function Navbar() {
   ];
 
   return (
-    <header className="mx-auto max-w-5xl py-5 px-10 rounded-full w-full border shadow-sm flex justify-between mt-5 items-center">
+    <header className="mx-auto max-w-5xl py-5 px-10 rounded-full w-full border shadow-sm flex flex-col md:flex-row gap-5 justify-between mt-5 items-center">
       <Link href={"/"}>
         <div className="logo text-2xl font-bold">Youtube Quiz</div>
       </Link>

@@ -4,6 +4,7 @@ export type TQuiz = {
   description: string;
   video_id: number;
   questions?: TQuestion[];
+  quiz_timer?: number;
 };
 
 export type TQuestion = {
