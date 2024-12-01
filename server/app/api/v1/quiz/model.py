@@ -13,3 +13,4 @@ class Quiz(Base):
     description = Column(String)
     video_id = Column(String)
     question_ids = Column(ARRAY(Integer))
+    quiz_timer = Column(Integer, nullable=True)

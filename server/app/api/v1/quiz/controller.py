@@ -11,13 +11,21 @@ quiz_router = APIRouter(prefix="/quiz")
 
 @quiz_router.post("/create-quiz")
 def create_quiz(
-    name: str, description: str, video_id: str, question_ids: list[int]
+    name: str,
+    description: str,
+    video_id: str,
+    question_ids: list[int],
+    quiz_timer: int = 0,
 ) -> dict:
     Quiz.__table__.create(bind=SessionLocal().get_bind(), checkfirst=True)
 
     db = SessionLocal()
     quiz = Quiz(
-        name=name, description=description, video_id=video_id, question_ids=question_ids
+        name=name,
+        description=description,
+        video_id=video_id,
+        question_ids=question_ids,
+        quiz_timer=quiz_timer,
     )
     db.add(quiz)
     db.commit()
@@ -31,6 +39,7 @@ def create_quiz(
                     "description": description,
                     "video_id": video_id,
                     "question_ids": question_ids,
+                    "quiz_timer": quiz_timer,
                 },
                 "message": "Quiz created successfully",
             }
@@ -42,7 +51,7 @@ def create_quiz(
 def get_quizzes() -> dict:
     db = SessionLocal()
     quizzes = db.query(Quiz).all()
-    
+
     print(quizzes)
 
     return JSONResponse(
@@ -55,6 +64,7 @@ def get_quizzes() -> dict:
                         "name": quiz.name,
                         "description": quiz.description,
                         "video_id": quiz.video_id,
+                        "quiz_timer": quiz.quiz_timer,
                     }
                     for quiz in quizzes
                 ]
@@ -97,6 +107,7 @@ def get_quiz(quiz_id: int) -> dict:
                 "description": quiz.description,
                 "video_id": quiz.video_id,
                 "questions": questions,
+                "quiz_timer": quiz.quiz_timer
             }
         ),
     )
