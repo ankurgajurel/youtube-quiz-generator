@@ -52,8 +52,6 @@ def get_quizzes() -> dict:
     db = SessionLocal()
     quizzes = db.query(Quiz).all()
 
-    print(quizzes)
-
     return JSONResponse(
         status_code=200,
         content=jsonable_encoder(
@@ -103,11 +101,12 @@ def get_quiz(quiz_id: int) -> dict:
         status_code=200,
         content=jsonable_encoder(
             {
+                "id": quiz.id,
                 "name": quiz.name,
                 "description": quiz.description,
                 "video_id": quiz.video_id,
                 "questions": questions,
-                "quiz_timer": quiz.quiz_timer
+                "quiz_timer": quiz.quiz_timer,
             }
         ),
     )
@@ -128,11 +127,19 @@ def validate_answers(answers: list[dict]) -> dict:
     }
 
     wrong_answers = []
+    scored_answers = []
 
     score = 0
 
     for answer in answers:
         if correct_answers[answer["question_id"]] == answer["answer"]:
+            scored_answers.append(
+                {
+                    "question_id": answer["question_id"],
+                    "correct_answer": answer["answer"],
+                    "answer": answer["answer"],
+                }
+            )
             score += 1
         else:
             wrong_answers.append(
@@ -145,7 +152,13 @@ def validate_answers(answers: list[dict]) -> dict:
 
     return JSONResponse(
         status_code=200,
-        content=jsonable_encoder({"score": score, "wrong_answers": wrong_answers}),
+        content=jsonable_encoder(
+            {
+                "score": score,
+                "wrong_answers": wrong_answers,
+                "scored_answers": scored_answers,
+            }
+        ),
     )
 
 
