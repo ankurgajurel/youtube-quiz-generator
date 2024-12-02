@@ -1,14 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import QuestionsField from "./questions-field";
 import { MoveLeft, MoveRight } from "lucide-react";
 import clsx from "clsx";
-import { TQuiz } from "@/@types/TQuiz";
-import validateQuizAnswers from "@/app/api/public/quiz/validate-answers";
-import ScoreBoard from "./score-board";
+import { toast } from "sonner";
 
+import QuestionsField from "./questions-field";
+import { TQuiz } from "@/@types/TQuiz";
 import QuizTracker from "./quiz-tracker";
+import { useFormStatus } from "react-dom";
+import Spinner from "@/components/common/spinner";
 
 export type TAnswer = {
   question_id: number;
@@ -24,15 +25,26 @@ const initialAnswers = (quiz: TQuiz | undefined) => {
   );
 };
 
-export default function QuizForm({ quiz }: { quiz: TQuiz | undefined }) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+export default function QuizForm({
+  quiz,
+  submitQuizAction,
+}: {
+  quiz: TQuiz | undefined;
+  submitQuizAction: (answers: TAnswer[]) => void;
+}) {
   const [activeQuestion, setActiveQuestion] = useState(0);
-  const [score, setScore] = useState<null | number>(null);
   const [unAnsweredQuestions, setUnAnsweredQuestions] = useState<number[]>([]);
   const [answers, setAnswers] = useState(initialAnswers(quiz));
   const [isSubmitActive, setIsSubmitActive] = useState(false);
 
+  const { pending } = useFormStatus();
+
   const handleAnswerChange = (option: string) => {
+    if (!isSubmitActive) {
+      toast("You've not started the quiz yet.");
+      return;
+    }
+
     const updatedAnswers = answers.map((answer, index) =>
       index === activeQuestion
         ? { question_id: answer.question_id, answer: option }
@@ -55,6 +67,11 @@ export default function QuizForm({ quiz }: { quiz: TQuiz | undefined }) {
     direction?: "next" | "prev";
     jumpIndex?: number | null;
   }) => {
+    if (!isSubmitActive) {
+      toast("You've not started the quiz yet.");
+      return;
+    }
+
     if (
       answers[activeQuestion].answer === "" &&
       !unAnsweredQuestions.includes(activeQuestion)
@@ -85,34 +102,6 @@ export default function QuizForm({ quiz }: { quiz: TQuiz | undefined }) {
     }
   };
 
-  const handleTryAgain = () => {
-    setAnswers(initialAnswers(quiz));
-    setUnAnsweredQuestions([])
-    setScore(null)
-    setActiveQuestion(0)
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (activeQuestion + 1 !== (quiz?.questions?.length ?? 0)) return;
-
-    const response = await validateQuizAnswers(answers);
-
-    console.log(response.score);
-
-    setScore(response.score);
-  };
-
-  if (score !== null) {
-    return (
-      <ScoreBoard
-        score={score}
-        quiz={quiz}
-        reloadQuiz={handleTryAgain}
-      />
-    );
-  }
-
   return (
     <div className="flex flex-col gap-5 w-full">
       <QuizTracker
@@ -126,20 +115,11 @@ export default function QuizForm({ quiz }: { quiz: TQuiz | undefined }) {
         setIsSubmitActive={setIsSubmitActive}
       />
       <form
-        onSubmit={
-          !isSubmitting
-            ? async (e) => {
-                setIsSubmitting(true);
-                await handleSubmit(e);
-                setIsSubmitting(false);
-              }
-            : undefined
-        }
+        action={() => submitQuizAction(answers)}
         className="flex-1 my-auto w-full min-w-xl mx-auto grid gap-5 col-span-2"
       >
         <div className="grid gap-3 border w-full border-black rounded-xl mx-auto p-5 min-h-[500px] place-items-stretch">
           <div className="flex justify-between items-start">
-            <div></div>
             <span className="font-bold">
               {activeQuestion + 1} / {quiz?.questions?.length}
             </span>
@@ -167,7 +147,10 @@ export default function QuizForm({ quiz }: { quiz: TQuiz | undefined }) {
             </button>
             <button
               type="button"
-              disabled={activeQuestion + 1 === (quiz?.questions?.length ?? 0)}
+              disabled={
+                activeQuestion + 1 === (quiz?.questions?.length ?? 0) ||
+                !isSubmitActive
+              }
               onClick={() => handleActiveQuestionChange({ direction: "next" })}
               className="bg-black h-fit w-1/2 md:w-fit hover:bg-opacity-70 transition-colors duration-200 text-white rounded-full px-7 py-3 flex gap-4 items-center disabled:opacity-50"
             >
@@ -180,16 +163,15 @@ export default function QuizForm({ quiz }: { quiz: TQuiz | undefined }) {
         <div className="flex justify-end">
           <button
             type="submit"
-            disabled={
-              activeQuestion + 1 < (quiz?.questions?.length ?? 0) ||
-              isSubmitting || !isSubmitActive
-            }
+            disabled={!isSubmitActive}
             className={clsx(
               "w-fit bg-black hover:bg-opacity-70 transition-colors duration-200 h-fit text-white rounded-full px-7 py-3 flex gap-4 items-center disabled:opacity-50"
             )}
           >
             <span className="font-bold">Submit</span>
-            <MoveRight />
+
+            {/* {pending ? <Spinner /> : <MoveRight />} */}
+            {pending ? "hello" : "fuckme"}
           </button>
         </div>
       </form>

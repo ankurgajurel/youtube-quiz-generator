@@ -1,12 +1,9 @@
 import QuizCard from "./quiz-card";
-import Spinner from "../../common/spinner";
 import { api } from "@/lib/fetch";
 import { TQuiz } from "@/@types/TQuiz";
 
 async function getAllQuizzes() {
   try {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
     const res = await fetch(api("/quiz"));
 
     if (!res.ok) {
@@ -21,13 +18,6 @@ async function getAllQuizzes() {
 
 export default async function AllQuiz() {
   const quiz = await getAllQuizzes();
-
-  if (!quiz)
-    return (
-      <div className="h-[60vh] w-[100vw] mx-auto my-auto flex items-center justify-center">
-        <Spinner />
-      </div>
-    );
 
   return (
     <div>

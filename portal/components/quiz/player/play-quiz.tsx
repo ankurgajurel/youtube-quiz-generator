@@ -1,8 +1,10 @@
 import { TQuiz } from "@/@types/TQuiz";
-import Spinner from "../../common/spinner";
 
-import QuizForm from "./quiz-form";
+import QuizForm, { TAnswer } from "./quiz-form";
 import { api } from "@/lib/fetch";
+import validateQuizAnswers from "@/app/api/public/quiz/validate-answers";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 async function getQuizDetails(quizId: number) {
   try {
@@ -21,12 +23,23 @@ async function getQuizDetails(quizId: number) {
 export default async function PlayQuiz({ quizId }: { quizId: string }) {
   const quiz: TQuiz = await getQuizDetails(+quizId);
 
-  if (!quiz)
-    return (
-      <div className="h-[60vh] w-[100vw] mx-auto my-auto flex items-center justify-center">
-        <Spinner />
-      </div>
-    );
+  const submitQuizAction = async (answers: TAnswer[]) => {
+    "use server";
+
+    const response = await validateQuizAnswers(answers);
+
+    const cookieStore = await cookies();
+    await cookieStore.set(`${quizId}-quiz-response`, JSON.stringify(response), {
+      maxAge: 500000,
+    });
+    await cookieStore.set(`${quizId}-quiz-questions`, JSON.stringify(quiz), {
+      maxAge: 500000,
+    });
+
+    await new Promise((r) => setTimeout(r, 5000));
+
+    redirect(`/quiz/${quizId}/score`);
+  };
 
   return (
     <main className="max-w-5xl mx-auto py-10 flex flex-col space-y-10 px-10">
@@ -35,7 +48,7 @@ export default async function PlayQuiz({ quizId }: { quizId: string }) {
         <p>{quiz?.description}</p>
       </div>
 
-      <QuizForm quiz={quiz} />
+      <QuizForm submitQuizAction={submitQuizAction} quiz={quiz} />
     </main>
   );
 }
