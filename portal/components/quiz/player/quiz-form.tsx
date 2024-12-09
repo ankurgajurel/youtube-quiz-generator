@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { MoveLeft, MoveRight } from "lucide-react";
-import clsx from "clsx";
 import { toast } from "sonner";
 
 import QuestionsField from "./questions-field";
@@ -25,6 +24,21 @@ const initialAnswers = (quiz: TQuiz | undefined) => {
   );
 };
 
+function SubmitButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="w-fit bg-black hover:bg-opacity-70 transition-colors duration-200 h-fit text-white rounded-full px-7 py-3 flex gap-4 items-center disabled:opacity-50"
+    >
+      <span className="font-bold">Submit</span>
+      {pending ? <Spinner className="w-5 h-5" /> : <MoveRight />}
+    </button>
+  );
+}
+
 export default function QuizForm({
   quiz,
   submitQuizAction,
@@ -36,8 +50,6 @@ export default function QuizForm({
   const [unAnsweredQuestions, setUnAnsweredQuestions] = useState<number[]>([]);
   const [answers, setAnswers] = useState(initialAnswers(quiz));
   const [isSubmitActive, setIsSubmitActive] = useState(false);
-
-  const { pending } = useFormStatus();
 
   const handleAnswerChange = (option: string) => {
     if (!isSubmitActive) {
@@ -115,7 +127,16 @@ export default function QuizForm({
         setIsSubmitActive={setIsSubmitActive}
       />
       <form
-        action={() => submitQuizAction(answers)}
+        action={() => {
+          if (!isSubmitActive) {
+            toast("You've not started the quiz yet.");
+            return;
+          }
+
+          setIsSubmitActive(false);
+
+          submitQuizAction(answers);
+        }}
         className="flex-1 my-auto w-full min-w-xl mx-auto grid gap-5 col-span-2"
       >
         <div className="grid gap-3 border w-full border-black rounded-xl mx-auto p-5 min-h-[500px] place-items-stretch">
@@ -161,18 +182,7 @@ export default function QuizForm({
           </div>
         </div>
         <div className="flex justify-end">
-          <button
-            type="submit"
-            disabled={!isSubmitActive}
-            className={clsx(
-              "w-fit bg-black hover:bg-opacity-70 transition-colors duration-200 h-fit text-white rounded-full px-7 py-3 flex gap-4 items-center disabled:opacity-50"
-            )}
-          >
-            <span className="font-bold">Submit</span>
-
-            {/* {pending ? <Spinner /> : <MoveRight />} */}
-            {pending ? "hello" : "fuckme"}
-          </button>
+          <SubmitButton />
         </div>
       </form>
     </div>

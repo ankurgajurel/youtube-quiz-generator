@@ -5,6 +5,8 @@ import clsx from "clsx";
 import { MoveRight } from "lucide-react";
 import { redirect } from "next/navigation";
 import ScoredCorrectQuestions from "./scored-correct-questions";
+import { useFormStatus } from "react-dom";
+import Spinner from "@/components/common/spinner";
 
 export type THelperQuizResponses = {
   id: number;
@@ -18,11 +20,9 @@ export type THelperQuizResponses = {
 export default function ScoreBoard({
   quiz,
   quizResponses,
-  quiz_id,
 }: {
   quiz: TQuiz;
   quizResponses: TQuizReponse;
-  quiz_id: string;
 }) {
   const colorSchemer = () => {
     const answers: THelperQuizResponses = [];
@@ -75,6 +75,8 @@ export function ActualScore({
   score: number;
   quiz_id: string;
 }) {
+  const { pending } = useFormStatus();
+
   return (
     <div className="max-w-xl w-full mx-auto border border-black flex items-center justify-center flex-col gap-10 p-5 rounded-3xl">
       <h1 className="text-3xl tracking-tight font-bold">Score</h1>
@@ -97,7 +99,7 @@ export function ActualScore({
         className="bg-black hover:bg-opacity-70 transition-colors duration-200 text-white rounded-full px-7 py-3 flex gap-4 items-center"
       >
         <span className="font-bold">Try Again</span>
-        <MoveRight />
+        {pending ? <Spinner className="w-5 h-5" /> : <MoveRight />}
       </button>
     </div>
   );

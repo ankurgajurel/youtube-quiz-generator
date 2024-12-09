@@ -6,7 +6,6 @@ import { motion } from "framer-motion";
 const Timer = ({
   totalTime = 60,
   isTimerActive,
-  setIsTimerActive,
 }: {
   totalTime?: number;
   isTimerActive: boolean;

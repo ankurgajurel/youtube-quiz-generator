@@ -33,7 +33,6 @@ export function EachQuestion({
   option,
   handleAnswerChange,
   answers,
-  // quiz,
   activeQuestion,
   scored,
   is_correct_answer,

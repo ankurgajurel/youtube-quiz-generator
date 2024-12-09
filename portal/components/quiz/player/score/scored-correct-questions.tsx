@@ -7,6 +7,7 @@ import { ActualScore, THelperQuizResponses } from "./score-board";
 import { MoveLeft, MoveRight } from "lucide-react";
 import Badge from "@/components/ui/badge";
 import ScoreBoardQuestionsIndex from "./score-board-questions-index";
+import { AnimatePresence, motion } from "framer-motion";
 
 export default function ScoredCorrectQuestions({
   quiz,
@@ -66,48 +67,63 @@ export default function ScoredCorrectQuestions({
           setActiveQuestion={setActiveQuestion}
           displayHelperAnswers={helperQuizResponses}
         />
-        hi{`${quiz.id}`}
         <ActualScore score={score} quiz={quiz} quiz_id={`${quiz.id}`} />
       </div>
-      <div className="grid gap-3 border border-black p-5 rounded-xl min-h-[530px]">
-        <h1 className="text-xl tracking-tight font-bold">
-          {quiz?.questions?.[activeQuestion].question_text}
-        </h1>
-        <Badge variant={getBadgeVariant()}>
-          {getBadgeVariant() === "success" && "Correct"}
-          {getBadgeVariant() === "error" && "Incorrect"}
-          {getBadgeVariant() === "warning" && "Unanswered"}
-        </Badge>
-        {helperQuizResponses[activeQuestion]?.options?.map((option) => (
-          <div key={option} className="grid gap-3">
-            <EachQuestion
-              option={option}
-              quiz={quiz}
-              activeQuestion={activeQuestion}
-              scored={() => {
-                if (
-                  helperQuizResponses[activeQuestion].correct_answer === option
-                ) {
-                  return 1;
-                }
+      <div className="flex flex-col justify-between gap-5 min-h-[530px]">
+        <div className="flex-1 border border-black p-5 rounded-xl">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeQuestion}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              transition={{ duration: 0.2 }}
+              className="grid gap-3 h-full"
+            >
+              <h1 className="text-xl tracking-tight font-bold">
+                {quiz?.questions?.[activeQuestion].question_text}
+              </h1>
+              <Badge variant={getBadgeVariant()}>
+                {getBadgeVariant() === "success" && "Correct"}
+                {getBadgeVariant() === "error" && "Incorrect"}
+                {getBadgeVariant() === "warning" && "Unanswered"}
+              </Badge>
+              {helperQuizResponses[activeQuestion]?.options?.map((option) => (
+                <div key={option} className="grid gap-3">
+                  <EachQuestion
+                    option={option}
+                    quiz={quiz}
+                    activeQuestion={activeQuestion}
+                    scored={() => {
+                      if (
+                        helperQuizResponses[activeQuestion].correct_answer ===
+                        option
+                      ) {
+                        return 1;
+                      }
 
-                if (
-                  helperQuizResponses[activeQuestion].user_answer === option &&
-                  helperQuizResponses[activeQuestion].scored === false
-                ) {
-                  return 0;
-                }
+                      if (
+                        helperQuizResponses[activeQuestion].user_answer ===
+                          option &&
+                        helperQuizResponses[activeQuestion].scored === false
+                      ) {
+                        return 0;
+                      }
 
-                return undefined;
-              }}
-              is_correct_answer={
-                option === helperQuizResponses[activeQuestion].correct_answer
-              }
-            />
-          </div>
-        ))}
+                      return undefined;
+                    }}
+                    is_correct_answer={
+                      option ===
+                      helperQuizResponses[activeQuestion].correct_answer
+                    }
+                  />
+                </div>
+              ))}
+            </motion.div>
+          </AnimatePresence>
+        </div>
 
-        <div className="flex flex-col md:flex-row w-full justify-between md:items-end gap-5">
+        <div className="flex flex-col md:flex-row w-full justify-between md:items-end gap-5 h-fit">
           <button
             type="button"
             onClick={() => handleActiveQuestionChange({ direction: "prev" })}

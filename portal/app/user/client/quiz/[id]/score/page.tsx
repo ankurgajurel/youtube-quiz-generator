@@ -22,7 +22,6 @@ export default async function QuizResult({
       <ScoreBoard
         quiz={JSON.parse(quizQuestions) as TQuiz}
         quizResponses={JSON.parse(quizResponses) as TQuizReponse}
-        quiz_id={id}
       />
     </div>
   );
