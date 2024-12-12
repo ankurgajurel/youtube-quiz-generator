@@ -75,8 +75,6 @@ export function ActualScore({
   score: number;
   quiz_id: string;
 }) {
-  const { pending } = useFormStatus();
-
   return (
     <div className="max-w-xl w-full mx-auto border border-black flex items-center justify-center flex-col gap-10 p-5 rounded-3xl">
       <h1 className="text-3xl tracking-tight font-bold">Score</h1>
@@ -94,13 +92,21 @@ export function ActualScore({
         {score}/{quiz?.questions?.length}
       </p>
 
-      <button
-        onClick={() => redirect(`/quiz/${quiz_id}`)}
-        className="bg-black hover:bg-opacity-70 transition-colors duration-200 text-white rounded-full px-7 py-3 flex gap-4 items-center"
-      >
-        <span className="font-bold">Try Again</span>
-        {pending ? <Spinner className="w-5 h-5" /> : <MoveRight />}
-      </button>
+      <SubmitButton onClick={() => redirect(`/quiz/${quiz_id}/score`)} />
     </div>
+  );
+}
+
+function SubmitButton({ onClick }: { onClick: () => void }) {
+  const { pending } = useFormStatus();
+
+  return (
+    <button
+      onClick={onClick}
+      className="bg-black hover:bg-opacity-70 transition-colors duration-200 text-white rounded-full px-7 py-3 flex gap-4 items-center"
+    >
+      <span className="font-bold">Try Again</span>
+      {pending ? <Spinner className="w-5 h-5" /> : <MoveRight />}
+    </button>
   );
 }
