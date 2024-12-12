@@ -38,6 +38,19 @@ fastapi dev
 docker compose up -d
 ```
 
+### Database
+
+```sh
+psql postgres
+
+CREATE DATABASE db;
+```
+
+### Serve
+
+The frontend for the admin portal is served at admin.localhost:port and client is served at client.localhost:port.
+The backend is served at localhost:8000. The docs are served at localhost:8000/docs.
+
 ## Contributing
 
 1. Fork the repository
